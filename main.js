@@ -55,7 +55,7 @@ if (window.Worker) {
     stopButton.addEventListener('click', () => {
         console.log('Terminating the worker');
         myWorker.postMessage(MESSAGES.stop);
-
+        myWorker.terminate();
     });
 
     const helpButton = document.querySelector('#help-button');
