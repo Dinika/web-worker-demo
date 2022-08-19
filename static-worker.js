@@ -14,23 +14,6 @@ const songs = [
 
 let intervalId;
 
-onmessage = (e) => {
-    console.log('Worker received message ', e.data);
-    const msg = e.data;
-
-    switch (msg) {
-        case 'START':
-            startSendingSongs();
-            break;
-        case 'STOP':
-            stopSendingSongs();
-            break;
-        default:
-            console.log('Unrecognized message received', msg);
-    }
-
-}
-
 const randomNumber = (min, max) => Math.floor(Math.random() * (max - min) + min);
 
 const startSendingSongs = () => {

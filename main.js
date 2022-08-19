@@ -22,16 +22,26 @@ if (window.Worker) {
             cleanupWorker(myWorker, myWorkerUrl);
         }
 
-        const workerFile = fileUploadInput.files[0];
+        const workerFile = await createNormalizedFile(fileUploadInput.files[0]);
         myWorkerUrl = URL.createObjectURL(workerFile);
-
-        const text = await workerFile.text();
 
         myWorker = new Worker(myWorkerUrl);
         myWorker.onmessage = onWorkerMessage;
         myWorker.onerror = onWorkerError;
         myWorker.onmessageerror = onWorkerMessageError;
     });
+
+    const createNormalizedFile = async (file) => {
+        const fileScript = await file.text();
+        const normalizedScript = `
+            ${fileScript}
+
+            ${normalizationScript}
+        `;
+
+        const normalizedBlob = new Blob([normalizedScript], { type: 'text/javascript' });
+        return normalizedBlob;
+    }
 
     const receivedValueEl = document.querySelector('#incoming-value');
 
@@ -69,3 +79,24 @@ const cleanupWorker = (worker, workerUrl) => {
     worker.terminate();
     URL.revokeObjectURL(workerUrl);
 }
+
+const normalizationScript = `
+
+onmessage = (e) => {
+    console.log('Worker received message ', e.data);
+    const msg = e.data;
+
+    switch (msg) {
+        case 'START':
+            startSendingSongs();
+            break;
+        case 'STOP':
+            stopSendingSongs();
+            break;
+        default:
+            console.log('Unrecognized message received', msg);
+    }
+
+}
+
+`;
