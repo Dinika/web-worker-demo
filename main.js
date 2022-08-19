@@ -4,14 +4,36 @@ const MESSAGES = {
 }
 
 if (window.Worker) {
-    const myWorker = new Worker('./static-worker.js');
+    let myWorker;
+    let myWorkerUrl;
+
+
+    const fileUploadBtn = document.getElementById('upload-file-button');
+    const fileUploadInput = document.getElementById('upload-file-input');
+
+    fileUploadBtn.addEventListener('click', e => {
+        if (fileUploadInput) {
+            fileUploadInput.click();
+        }
+    });
+
+    fileUploadInput.addEventListener('change', async (e) => {
+        if (myWorker) {
+            cleanupWorker(myWorker, myWorkerUrl);
+        }
+
+        const workerFile = fileUploadInput.files[0];
+        myWorkerUrl = URL.createObjectURL(workerFile);
+
+        const text = await workerFile.text();
+
+        myWorker = new Worker(myWorkerUrl);
+        myWorker.onmessage = onWorkerMessage;
+        myWorker.onerror = onWorkerError;
+        myWorker.onmessageerror = onWorkerMessageError;
+    });
+
     const receivedValueEl = document.querySelector('#incoming-value');
-
-    myWorker.onmessage = (e) => {
-        console.log('Message received from worker');
-        receivedValueEl.textContent = e.data;
-    }
-
 
     const startButton = document.querySelector('#start-button');
     startButton.addEventListener('click', () => {
@@ -26,13 +48,24 @@ if (window.Worker) {
 
     });
 
-    myWorker.onerror = (e) => {
+    const onWorkerMessage = (e) => {
+        console.log('Message received from worker');
+        receivedValueEl.textContent = e.data;
+    }
+
+    const onWorkerError = (e) => {
         console.log('Error received from worker', e);
         receivedValueEl.textContent = e.data;
     }
 
-    myWorker.onmessageerror = (e) => {
+    const onWorkerMessageError = (e) => {
         console.log('Message error received from worker', e);
         receivedValueEl.textContent = e.data;
     }
+}
+
+const cleanupWorker = (worker, workerUrl) => {
+    console.log('Stop currently running worker');
+    worker.terminate();
+    URL.revokeObjectURL(workerUrl);
 }
