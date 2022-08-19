@@ -16,9 +16,9 @@ let intervalId;
 
 const randomNumber = (min, max) => Math.floor(Math.random() * (max - min) + min);
 
-const startSendingSongs = () => {
+const start = () => {
     if (!intervalId) {
-        console.log('Starting interval')
+        console.log('Starting interval');
         intervalId = setInterval(() => {
             const songOfTheMoment = songs[randomNumber(0, songs.length)];
             console.log('Going to post ', songOfTheMoment);
@@ -31,7 +31,7 @@ const startSendingSongs = () => {
     }
 }
 
-const stopSendingSongs = () => {
+const stop = () => {
     console.log('Clearing Interval', intervalId);
     clearInterval(intervalId);
     intervalId = null;

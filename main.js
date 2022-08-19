@@ -34,9 +34,9 @@ if (window.Worker) {
     const createNormalizedFile = async (file) => {
         const fileScript = await file.text();
         const normalizedScript = `
-            ${fileScript}
-
             ${normalizationScript}
+            
+            ${fileScript}
         `;
 
         const normalizedBlob = new Blob([normalizedScript], { type: 'text/javascript' });
@@ -58,6 +58,29 @@ if (window.Worker) {
 
     });
 
+    const helpButton = document.querySelector('#help-button');
+    const helpDialog = document.getElementById('help-dialog');
+    helpButton.addEventListener('click', () => {
+        helpDialog.showModal();
+    });
+
+    // Close dialog when close button is clicked
+    const closeHelpButton = document.getElementById('close-help');
+    closeHelpButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        helpDialog.close();
+    })
+
+    // Close dialog when backdrop is clicked
+    helpDialog.addEventListener('click', () => {
+        var rect = helpDialog.getBoundingClientRect();
+        var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height
+            && rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+        if (!isInDialog) {
+            helpDialog.close();
+        }
+    })
+
     const onWorkerMessage = (e) => {
         console.log('Message received from worker');
         receivedValueEl.textContent = e.data;
@@ -72,6 +95,8 @@ if (window.Worker) {
         console.log('Message error received from worker', e);
         receivedValueEl.textContent = e.data;
     }
+} else {
+    alert('Woops! Your browser does not support web workers which is kind of essential for this demo.')
 }
 
 const cleanupWorker = (worker, workerUrl) => {
@@ -88,10 +113,10 @@ onmessage = (e) => {
 
     switch (msg) {
         case 'START':
-            startSendingSongs();
+            start();
             break;
         case 'STOP':
-            stopSendingSongs();
+            stop();
             break;
         default:
             console.log('Unrecognized message received', msg);

@@ -80,17 +80,100 @@
             font-size: 18px;
         }
 
-        #start-button {
+        .bg-green {
             background-color: #3FC37D;;
         }
 
-        #stop-button {
+        .bg-red {
             background-color: #FC724C;
         }
 
-        #upload-file-button {
+        .bg-blue {
             background-color: #87C5E1;
         }
+
+        dialog {
+            position: absolute;
+            width: 50vw;
+            border-radius: 8px;
+            min-height: 30rem;
+            border: 4px solid black;
+        }
+
+        dialog #close-help {
+            all: unset;
+            cursor: pointer;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 24px;
+            color: black;
+        }
+
+        dialog::backdrop {
+            background: rgba(0,0,0,0.5)
+        }
+
+        dialog .content {
+            margin: auto 40px;
+        }
+
+        dialog .content .description {
+            text-align: left;
+        }
+
+        dialog a {
+            color: #2a9d60;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        dialog p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        dialog h3 {
+            font-size: 30px;
+            color: #2a9d60;
+            margin: 16px 0;
+        }
+
+        .code {
+            background: lightgray;
+            padding: 4px;
+            font-family: monospace;
+        }
+
+        span.round-box {
+            margin-left: 0px;
+            display: inline-block;
+            height: unset;
+            width: unset;
+            font-size: 14px;
+            padding: 4px 12px;
+        }
+
+        button#help-button {
+            width: 50px;
+            margin: 0 auto;
+            border: 4px solid black;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .source-code {
+            position: absolute;
+            bottom: 0;
+            color: black;
+            font-size: 20px;
+        }
+
     </style>
     
 </head>
@@ -107,14 +190,46 @@
         
         <div class="flex actions">
             <input type="file" id="upload-file-input" accept=".js" style="display:none">
-            <button id="upload-file-button" class="round-box">Upload Worker</button>
+            <button id="upload-file-button" class="round-box bg-blue">Upload Script</button>
 
-            <button id="start-button" class="round-box">Start Receiving Values</button>
-            <button id="stop-button" class="round-box">Stop Receiving Values</button>
+            <button id="start-button" class="round-box bg-green">Start Script</button>
+            <button id="stop-button" class="round-box bg-red">Stop Script</button>
         </div>
+
+        <button id="help-button" title="Help wanted">?</button>
     </div>
     
-    <dialog></dialog>
+    <a href="https://github.com/Dinika/web-worker-demo.git" class="source-code">Source Code</a>
+    
+    <dialog id="help-dialog">
+        <button id="close-help">X</button>
+        <div class="content">
+            <h1>Help is Here</h1>
+            <div class="description">
+
+                
+                <p>This demo allows you to run ANY javascript file in a web worker!</p>
+
+                <h3>Wanna try?</h3>
+
+                <p>Hit the <span class="round-box bg-blue">Upload Script</span> button to upload a javascript file that contains the script which you would like to run in the worker.</p>
+                
+                <p>Hit the <span class="round-box bg-green">Start Script</span> button to start the execution of your script. This will call the <span  class="code">start()</span> function in your script (if there is one).</p>
+                
+                <p>If your script posts any messages via the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage()</a>
+                    API to the main script on this page, then it will be displayed as <span class="round-box">Incoming value</span>.
+                </p>
+
+                <p>You can hit the <span class="round-box bg-red">Stop Script</span> button to stop the execution of your script. This will call the <span class="code">stop()</span> function in your script (if there is one) and terminate the worker.</p>
+
+                <h3>Want to check out some example scripts?</h3>
+                <ul>
+                    <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">This simple script</a> posts the current time every second.</li>
+                    <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">This script</a> posts a Queen's song every 2 seconds.</li>
+                </ul>
+            </div>
+        </div>
+    </dialog>
     
     <script type="module">
         import './main.js'
