@@ -45,14 +45,14 @@ if (window.Worker) {
             return () => cleanupWorker(myWorker, myWorkerUrl);
         });
 
-        toggleButtonVisibility({ show: [startButton], hide: [fileUploadBtn, stopButton] });
+        toggleDisablityOfButtons({ enable: [startButton], disable: [fileUploadBtn, stopButton] });
     });
 
     startButton.addEventListener('click', () => {
         workerValuesSubscription = workerValues$.subscribe(val => receivedValueEl.textContent = val);
         myWorker.postMessage(MESSAGES.start);
 
-        toggleButtonVisibility({ show: [stopButton], hide: [fileUploadBtn, startButton] });
+        toggleDisablityOfButtons({ enable: [stopButton], disable: [fileUploadBtn, startButton] });
     });
 
     stopButton.addEventListener('click', () => {
@@ -60,7 +60,7 @@ if (window.Worker) {
         workerValues$ = null;
         workerValuesSubscription = null;
 
-        toggleButtonVisibility({ show: [fileUploadBtn], hide: [startButton, stopButton] });
+        toggleDisablityOfButtons({ enable: [fileUploadBtn], disable: [startButton, stopButton] });
     });
 
     helpButton.addEventListener('click', () => {
@@ -143,13 +143,13 @@ onmessage = (e) => {
 
 `;
 
-const toggleButtonVisibility = ({ show, hide }) => {
-    show.forEach(element => {
-        element.style.display = 'block';
+const toggleDisablityOfButtons = ({ enable, disable }) => {
+    enable.forEach(element => {
+        element.removeAttribute('disabled');
     });
 
 
-    hide.forEach(element => {
-        element.style.display = 'none';
+    disable.forEach(element => {
+        element.setAttribute('disabled', 'true');
     });
 }

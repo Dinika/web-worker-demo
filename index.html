@@ -70,11 +70,18 @@
         }
 
         .actions button {
-            cursor: pointer;          
+            cursor: pointer;
+            color: black;       
         }
 
         .actions button:active {
             box-shadow: inset 0 -3px black;
+        }
+
+
+        .actions button:disabled {
+            cursor: not-allowed;    
+            opacity: 0.7;      
         }
 
         #incoming-value {
@@ -193,8 +200,8 @@
             <input type="file" id="upload-file-input" accept=".js" style="display:none">
             <button id="upload-file-button" class="round-box bg-blue">Upload Script</button>
 
-            <button id="start-button" class="round-box bg-green" style="display: none;">Start Script</button>
-            <button id="stop-button" class="round-box bg-red" style="display: none;">Stop Script</button>
+            <button id="start-button" disabled class="round-box bg-green">Start Script</button>
+            <button id="stop-button" disabled class="round-box bg-red">Stop Script</button>
         </div>
 
         <button id="help-button" title="Help wanted">?</button>
@@ -215,7 +222,7 @@
 
                 <p>Hit the <span class="round-box bg-blue">Upload Script</span> button to upload a javascript file that contains the script which you would like to run in the worker.</p>
                 
-                <p>Hit the <span class="round-box bg-green">Start Script</span> button to start the execution of your script inside a worker. This is also call the <span  class="code">start()</span> function in your script (if there is one).</p>
+                <p>Hit the <span class="round-box bg-green">Start Script</span> button to start the execution of your script inside a worker. This is also calls the <span  class="code">start()</span> function in your script (if there is one).</p>
                 
                 <p>If your script posts any messages via the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage()</a>
                     API to the main script on this page, then it will be displayed as <span class="round-box">Incoming value</span>.
