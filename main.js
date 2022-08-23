@@ -1,3 +1,5 @@
+const { Observable, startWith } = rxjs;
+
 const MESSAGES = {
     start: 'START',
     stop: 'STOP',
@@ -5,11 +7,20 @@ const MESSAGES = {
 
 if (window.Worker) {
     let myWorker;
-    let myWorkerUrl;
-
+    let workerValues$;
+    let workerValuesSubscription;
 
     const fileUploadBtn = document.getElementById('upload-file-button');
     const fileUploadInput = document.getElementById('upload-file-input');
+
+    const startButton = document.getElementById('start-button');
+    const stopButton = document.getElementById('stop-button');
+
+    const receivedValueEl = document.getElementById('incoming-value');
+
+    const helpButton = document.getElementById('help-button');
+    const helpDialog = document.getElementById('help-dialog');
+    const closeHelpButton = document.getElementById('close-help');
 
     fileUploadBtn.addEventListener('click', e => {
         if (fileUploadInput) {
@@ -17,92 +28,98 @@ if (window.Worker) {
         }
     });
 
-    fileUploadInput.addEventListener('change', async (e) => {
-        if (myWorker) {
-            cleanupWorker(myWorker, myWorkerUrl);
-        }
-
+    fileUploadInput.addEventListener('change', async () => {
         const workerFile = await createNormalizedFile(fileUploadInput.files[0]);
-        myWorkerUrl = URL.createObjectURL(workerFile);
+        const myWorkerUrl = URL.createObjectURL(workerFile);
 
-        myWorker = new Worker(myWorkerUrl);
-        myWorker.onmessage = onWorkerMessage;
-        myWorker.onerror = onWorkerError;
-        myWorker.onmessageerror = onWorkerMessageError;
+        workerValues$ = new Observable(subscriber => {
+            // Intialize the observer
+            myWorker = new Worker(myWorkerUrl);
+
+            // Setup handlers for incoming message / error
+            myWorker.onmessage = e => onWorkerMessage(e, subscriber);
+            myWorker.onerror = e => onWorkerError(e, subscriber);
+            myWorker.onmessageerror = e => onWorkerMessageError(e, subscriber);
+
+            // Setup teardown logic
+            return () => cleanupWorker(myWorker, myWorkerUrl);
+        });
+
+        toggleButtonVisibility({ show: [startButton], hide: [fileUploadBtn, stopButton] });
     });
 
-    const createNormalizedFile = async (file) => {
-        const fileScript = await file.text();
-        const normalizedScript = `
-            ${normalizationScript}
-            
-            ${fileScript}
-        `;
-
-        const normalizedBlob = new Blob([normalizedScript], { type: 'text/javascript' });
-        return normalizedBlob;
-    }
-
-    const receivedValueEl = document.querySelector('#incoming-value');
-
-    const startButton = document.querySelector('#start-button');
     startButton.addEventListener('click', () => {
-        console.log('Starting the worker');
+        workerValuesSubscription = workerValues$.subscribe(val => receivedValueEl.textContent = val);
         myWorker.postMessage(MESSAGES.start);
+
+        toggleButtonVisibility({ show: [stopButton], hide: [fileUploadBtn, startButton] });
     });
 
-    const stopButton = document.querySelector('#stop-button');
     stopButton.addEventListener('click', () => {
-        console.log('Terminating the worker');
-        myWorker.postMessage(MESSAGES.stop);
-        myWorker.terminate();
+        workerValuesSubscription.unsubscribe();
+        workerValues$ = null;
+        workerValuesSubscription = null;
+
+        toggleButtonVisibility({ show: [fileUploadBtn], hide: [startButton, stopButton] });
     });
 
-    const helpButton = document.querySelector('#help-button');
-    const helpDialog = document.getElementById('help-dialog');
     helpButton.addEventListener('click', () => {
         helpDialog.showModal();
     });
 
     // Close dialog when close button is clicked
-    const closeHelpButton = document.getElementById('close-help');
     closeHelpButton.addEventListener('click', (e) => {
         e.stopPropagation();
         helpDialog.close();
-    })
+    });
 
     // Close dialog when backdrop is clicked
-    helpDialog.addEventListener('click', () => {
+    helpDialog.addEventListener('click', (event) => {
         var rect = helpDialog.getBoundingClientRect();
         var isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height
             && rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
         if (!isInDialog) {
             helpDialog.close();
         }
-    })
+    });
 
-    const onWorkerMessage = (e) => {
-        console.log('Message received from worker');
-        receivedValueEl.textContent = e.data;
+    const onWorkerMessage = (e, subscriber) => {
+        console.log('Message received from worker', e);
+        subscriber.next(e.data);
     }
 
-    const onWorkerError = (e) => {
+    const onWorkerError = (e, subscriber) => {
         console.log('Error received from worker', e);
-        receivedValueEl.textContent = e.data;
+        subscriber.next(e.data);
     }
 
-    const onWorkerMessageError = (e) => {
+    const onWorkerMessageError = (e, subscriber) => {
         console.log('Message error received from worker', e);
-        receivedValueEl.textContent = e.data;
+        subscriber.next(e.data);
     }
 } else {
-    alert('Woops! Your browser does not support web workers which is kind of essential for this demo.')
+    alert('Woops! Your browser does not support web workers which is kind of essential for this demo.');
 }
 
 const cleanupWorker = (worker, workerUrl) => {
-    console.log('Stop currently running worker');
+    // Allow the worker to do some cleanup
+    worker.postMessage(MESSAGES.stop);
+
     worker.terminate();
+
     URL.revokeObjectURL(workerUrl);
+}
+
+const createNormalizedFile = async (file) => {
+    const fileScript = await file.text();
+    const normalizedScript = `
+        ${normalizationScript}
+        
+        ${fileScript}
+    `;
+
+    const normalizedBlob = new Blob([normalizedScript], { type: 'text/javascript' });
+    return normalizedBlob;
 }
 
 const normalizationScript = `
@@ -125,3 +142,14 @@ onmessage = (e) => {
 }
 
 `;
+
+const toggleButtonVisibility = ({ show, hide }) => {
+    show.forEach(element => {
+        element.style.display = 'block';
+    });
+
+
+    hide.forEach(element => {
+        element.style.display = 'none';
+    });
+}

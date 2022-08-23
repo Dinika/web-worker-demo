@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet"> 
     
     <title>Web Worker</title>
+    <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
 
     <style>
         html {
@@ -192,8 +193,8 @@
             <input type="file" id="upload-file-input" accept=".js" style="display:none">
             <button id="upload-file-button" class="round-box bg-blue">Upload Script</button>
 
-            <button id="start-button" class="round-box bg-green">Start Script</button>
-            <button id="stop-button" class="round-box bg-red">Stop Script</button>
+            <button id="start-button" class="round-box bg-green" style="display: none;">Start Script</button>
+            <button id="stop-button" class="round-box bg-red" style="display: none;">Stop Script</button>
         </div>
 
         <button id="help-button" title="Help wanted">?</button>
@@ -214,7 +215,7 @@
 
                 <p>Hit the <span class="round-box bg-blue">Upload Script</span> button to upload a javascript file that contains the script which you would like to run in the worker.</p>
                 
-                <p>Hit the <span class="round-box bg-green">Start Script</span> button to start the execution of your script. This will call the <span  class="code">start()</span> function in your script (if there is one).</p>
+                <p>Hit the <span class="round-box bg-green">Start Script</span> button to start the execution of your script inside a worker. This is also call the <span  class="code">start()</span> function in your script (if there is one).</p>
                 
                 <p>If your script posts any messages via the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage()</a>
                     API to the main script on this page, then it will be displayed as <span class="round-box">Incoming value</span>.

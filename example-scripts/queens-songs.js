@@ -18,7 +18,6 @@ const randomNumber = (min, max) => Math.floor(Math.random() * (max - min) + min)
 
 const start = () => {
     if (!intervalId) {
-        console.log('Starting interval');
         intervalId = setInterval(() => {
             const songOfTheMoment = songs[randomNumber(0, songs.length)];
             console.log('Going to post ', songOfTheMoment);

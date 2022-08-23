@@ -2,7 +2,6 @@ let intervalId;
 
 const start = () => {
     if (!intervalId) {
-
         sendCurrentTime();
 
         intervalId = setInterval(() => {
