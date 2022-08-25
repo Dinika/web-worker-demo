@@ -44,15 +44,15 @@ if (window.Worker) {
             // Setup teardown logic
             return () => cleanupWorker(myWorker, myWorkerUrl);
         });
+        workerValuesSubscription = workerValues$.subscribe(val => receivedValueEl.textContent = val);
 
         toggleDisablityOfButtons({ enable: [startButton], disable: [fileUploadBtn, stopButton] });
     });
 
     startButton.addEventListener('click', () => {
-        workerValuesSubscription = workerValues$.subscribe(val => receivedValueEl.textContent = val);
-        myWorker.postMessage(MESSAGES.start);
+        myWorker.postMessage(randomNumber(0, 10));
 
-        toggleDisablityOfButtons({ enable: [stopButton], disable: [fileUploadBtn, startButton] });
+        // toggleDisablityOfButtons({ enable: [stopButton], disable: [fileUploadBtn, startButton] });
     });
 
     stopButton.addEventListener('click', () => {
@@ -126,22 +126,14 @@ const normalizationScript = `
 
 onmessage = (e) => {
     console.log('Worker received message ', e.data);
-    const msg = e.data;
 
-    switch (msg) {
-        case 'START':
-            start();
-            break;
-        case 'STOP':
-            stop();
-            break;
-        default:
-            console.log('Unrecognized message received', msg);
-    }
-
+    const msg = start(e.data);
+    postMessage(msg);
 }
 
 `;
+
+const randomNumber = (min, max) => Math.floor(Math.random() * (max - min) + min);
 
 const toggleDisablityOfButtons = ({ enable, disable }) => {
     enable.forEach(element => {
